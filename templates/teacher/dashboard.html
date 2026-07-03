@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">My Classes</h2>
+
+<h5>Score Entry</h5>
+<div class="table-responsive mb-4">
+<table class="table table-hover bg-white shadow-sm align-middle">
+  <thead class="table-light"><tr><th>Class</th><th>Subject</th><th></th></tr></thead>
+  <tbody>
+  {% for a in assignments %}
+    <tr>
+      <td>{{ a.school_class.name }}</td>
+      <td>{{ a.subject.name }}</td>
+      <td class="text-end">
+        <a href="{{ url_for('teacher.enter_scores', class_id=a.class_id, subject_id=a.subject_id) }}"
+           class="btn btn-sm btn-primary">Enter Scores</a>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="3" class="text-center text-muted py-4">No subjects assigned to you yet. Ask your admin.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+{% if form_classes %}
+<h5>Classes You're Form Teacher For</h5>
+<div class="table-responsive">
+<table class="table table-hover bg-white shadow-sm align-middle">
+  <thead class="table-light"><tr><th>Class</th><th>Subjects (you can enter any of these)</th><th></th></tr></thead>
+  <tbody>
+  {% for c in form_classes %}
+    <tr>
+      <td>{{ c.name }}</td>
+      <td>
+        {% for cs in form_class_subjects.get(c.id, []) %}
+        <a href="{{ url_for('teacher.enter_scores', class_id=c.id, subject_id=cs.subject_id) }}"
+           class="badge text-bg-primary text-decoration-none">{{ cs.subject.name }}</a>
+        {% else %}
+        <span class="text-muted small">No subjects added to this class yet</span>
+        {% endfor %}
+      </td>
+      <td class="text-end">
+        <a href="{{ url_for('teacher.class_remarks', class_id=c.id) }}" class="btn btn-sm btn-outline-secondary">Skills, Fees &amp; Remarks</a>
+        <a href="{{ url_for('results.class_results', class_id=c.id) }}" class="btn btn-sm btn-outline-success">View Results</a>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

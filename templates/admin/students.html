@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-1">{{ sc.name }} — Students</h2>
+<p class="text-muted">{{ students|length }} student(s)</p>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h6>Add one student</h6>
+        <form method="POST" enctype="multipart/form-data" class="row g-2">
+          <div class="col-12"><input type="text" name="name" class="form-control" placeholder="Full name" required></div>
+          <div class="col-6">
+            <select name="sex" class="form-select">
+              <option value="">Sex</option><option value="Male">Male</option><option value="Female">Female</option>
+            </select>
+          </div>
+          <div class="col-6"><input type="text" name="roll_no" class="form-control" placeholder="Roll No."></div>
+          <div class="col-12">
+            <label class="form-label small mb-1">Passport Photo (optional)</label>
+            <input type="file" name="photo" accept=".png,.jpg,.jpeg,.gif,.webp" class="form-control form-control-sm">
+          </div>
+          <div class="col-12"><button class="btn btn-primary w-100">Add Student</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h6>Bulk add (one name per line)</h6>
+        <p class="text-muted small">Add photos individually afterwards using the camera icon next to each student.</p>
+        <form method="POST" action="{{ url_for('admin.bulk_add_students', class_id=sc.id) }}">
+          <textarea name="names" class="form-control mb-2" rows="4" placeholder="John Doe&#10;Jane Smith"></textarea>
+          <button class="btn btn-outline-primary w-100">Add All</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="table-responsive">
+<table class="table table-hover bg-white shadow-sm align-middle">
+  <thead class="table-light"><tr><th>Photo</th><th>Name</th><th>Sex</th><th>Roll No.</th><th></th></tr></thead>
+  <tbody>
+  {% for s in students %}
+    <tr>
+      <td>
+        {% if s.photo_path %}
+        <img src="{{ url_for('static', filename=s.photo_path) }}" alt="{{ s.name }}"
+             style="width:42px;height:42px;object-fit:cover;border-radius:6px;">
+        {% else %}
+        <div class="bg-light border rounded d-flex align-items-center justify-content-center text-muted"
+             style="width:42px;height:42px;font-size:0.7rem;">N/A</div>
+        {% endif %}
+      </td>
+      <td>{{ s.name }}</td><td>{{ s.sex }}</td><td>{{ s.roll_no }}</td>
+      <td class="text-end">
+        <a href="{{ url_for('results.student_result', student_id=s.id) }}" class="btn btn-sm btn-outline-success">Result</a>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#photoForm{{ s.id }}">
+          <i class="bi bi-camera"></i>
+        </button>
+        <form method="POST" action="{{ url_for('admin.delete_student', student_id=s.id) }}" class="d-inline"
+              onsubmit="return confirm('Remove {{ s.name }}?');">
+          <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+        </form>
+      </td>
+    </tr>
+    <tr class="collapse" id="photoForm{{ s.id }}">
+      <td colspan="5" class="bg-light">
+        <form method="POST" action="{{ url_for('admin.update_student_photo', student_id=s.id) }}"
+              enctype="multipart/form-data" class="d-flex gap-2 align-items-center py-2">
+          <input type="file" name="photo" accept=".png,.jpg,.jpeg,.gif,.webp" class="form-control form-control-sm" style="max-width:280px;" required>
+          <button class="btn btn-sm btn-primary">Upload Photo</button>
+          {% if s.photo_path %}
+          <button class="btn btn-sm btn-outline-danger" type="submit"
+                  formaction="{{ url_for('admin.remove_student_photo', student_id=s.id) }}" formnovalidate>Remove Photo</button>
+          {% endif %}
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5" class="text-center text-muted py-4">No students yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+<a href="{{ url_for('admin.classes') }}" class="btn btn-outline-secondary">&larr; Back to Classes</a>
+{% endblock %}

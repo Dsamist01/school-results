@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-1">{{ sc.name }} — {{ subject.name }}</h2>
+<p class="text-muted">{{ term }}, {{ session }} &middot; Test is out of 40, Exam is out of 60.</p>
+
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h6 class="mb-2"><i class="bi bi-file-earmark-arrow-up"></i> Bulk import from Excel/CSV</h6>
+    <p class="text-muted small mb-2">
+      Download the template below (already has your student names), fill in the Test and
+      Exam columns in Excel, then upload it here. You'll get a chance to review before saving.
+    </p>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <a href="{{ url_for('teacher.download_score_template', class_id=sc.id, subject_id=subject.id) }}"
+         class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-download"></i> Download Template
+      </a>
+      <form method="POST" action="{{ url_for('teacher.import_scores', class_id=sc.id, subject_id=subject.id) }}"
+            enctype="multipart/form-data" class="d-flex gap-2 align-items-center">
+        <input type="file" name="score_file" accept=".xlsx,.csv" class="form-control form-control-sm" required>
+        <button class="btn btn-primary btn-sm text-nowrap"><i class="bi bi-upload"></i> Import File</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% if import_preview %}
+<div class="alert alert-info"><i class="bi bi-info-circle"></i> Showing imported values below — nothing is saved yet. Review, then click <strong>Save Scores</strong>.</div>
+{% endif %}
+
+<form method="POST" action="{{ url_for('teacher.enter_scores', class_id=sc.id, subject_id=subject.id) }}">
+<div class="table-responsive">
+<table class="table table-hover bg-white shadow-sm align-middle">
+  <thead class="table-light"><tr><th>#</th><th>Student</th><th style="width:120px">Test (40)</th><th style="width:120px">Exam (60)</th><th>Total</th></tr></thead>
+  <tbody>
+  {% for row in rows %}
+    <tr class="{% if row.get('imported') %}{{ 'table-warning' if row.get('fuzzy') else 'table-success' }}{% endif %}">
+      <td>{{ loop.index }}</td>
+      <td>{{ row.student.name }}{% if row.get('fuzzy') %} <span class="badge text-bg-warning" title="Matched by closest spelling — double-check">?</span>{% endif %}</td>
+      <td><input type="number" step="0.5" min="0" max="40" name="test_{{ row.student.id }}"
+                 value="{{ row.test }}" class="form-control form-control-sm test-input" data-row="{{ loop.index0 }}"></td>
+      <td><input type="number" step="0.5" min="0" max="60" name="exam_{{ row.student.id }}"
+                 value="{{ row.exam }}" class="form-control form-control-sm exam-input" data-row="{{ loop.index0 }}"></td>
+      <td><span class="total-display" data-row="{{ loop.index0 }}">{{ (row.test or 0)|float + (row.exam or 0)|float }}</span></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5" class="text-center text-muted py-4">No students in this class yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% if rows %}
+<button class="btn btn-primary"><i class="bi bi-save"></i> Save Scores</button>
+{% endif %}
+</form>
+
+<script>
+function recalc(row) {
+  const t = parseFloat(document.querySelector(`.test-input[data-row="${row}"]`).value) || 0;
+  const e = parseFloat(document.querySelector(`.exam-input[data-row="${row}"]`).value) || 0;
+  document.querySelector(`.total-display[data-row="${row}"]`).textContent = (t + e).toFixed(1);
+}
+document.querySelectorAll('.test-input, .exam-input').forEach(el => {
+  el.addEventListener('input', () => recalc(el.dataset.row));
+});
+</script>
+{% endblock %}

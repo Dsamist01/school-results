@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-1">Grading Scale</h2>
+<p class="text-muted">Test 40% + Exam 60% = Total 100%. Edit the bands below to match your school's policy.</p>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <form method="POST" class="row g-2 align-items-end">
+      <div class="col-md-2"><label class="form-label">Min Score</label>
+        <input type="number" step="0.01" name="min_score" class="form-control" required></div>
+      <div class="col-md-2"><label class="form-label">Max Score</label>
+        <input type="number" step="0.01" name="max_score" class="form-control" required></div>
+      <div class="col-md-2"><label class="form-label">Grade</label>
+        <input type="text" name="grade" class="form-control" placeholder="A+" required></div>
+      <div class="col-md-3"><label class="form-label">Remark</label>
+        <input type="text" name="remark" class="form-control" placeholder="Outstanding"></div>
+      <div class="col-md-3"><button class="btn btn-primary w-100">Add Band</button></div>
+    </form>
+  </div>
+</div>
+
+<table class="table table-hover bg-white shadow-sm align-middle">
+  <thead class="table-light"><tr><th>Range</th><th>Grade</th><th>Remark</th><th></th></tr></thead>
+  <tbody>
+  {% for b in bands %}
+    <tr>
+      <td>{{ b.min_score }} – {{ b.max_score }}</td>
+      <td><span class="badge text-bg-primary">{{ b.grade }}</span></td>
+      <td>{{ b.remark }}</td>
+      <td class="text-end">
+        <form method="POST" action="{{ url_for('admin.delete_grade_band', band_id=b.id) }}">
+          <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

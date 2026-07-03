@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0">{{ student.name }}</h2>
+    <p class="text-muted mb-0">{{ sc.name }} &middot; {{ term }}, {{ session }}</p>
+  </div>
+  <a href="{{ url_for('results.export_student_pdf', student_id=student.id) }}" class="btn btn-danger">
+    <i class="bi bi-file-earmark-pdf"></i> Export PDF
+  </a>
+</div>
+
+{% if result %}
+<div class="table-responsive">
+<table class="table table-bordered bg-white shadow-sm align-middle">
+  <thead class="table-light">
+    <tr><th>Subject</th><th>Test</th><th>Exam</th><th>Total</th><th>Average</th><th>Position</th><th>Grade</th><th>Remark</th></tr>
+  </thead>
+  <tbody>
+  {% for cs_id, sub in result.subjects.items() %}
+    <tr>
+      <td>{{ sub.subject }}</td><td>{{ sub.test }}</td><td>{{ sub.exam }}</td>
+      <td class="fw-bold">{{ sub.total }}</td><td>{{ sub.average }}</td>
+      <td>{{ sub.position }}</td><td>{{ sub.grade }}</td><td>{{ sub.remark }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="card text-bg-light shadow-sm"><div class="card-body text-center">
+    <h6>Grand Total</h6><h3>{{ result.grand_total }}/{{ result.max_total }}</h3></div></div></div>
+  <div class="col-md-4"><div class="card text-bg-light shadow-sm"><div class="card-body text-center">
+    <h6>Percentage</h6><h3>{{ result.percentage }}%</h3></div></div></div>
+  <div class="col-md-4"><div class="card text-bg-light shadow-sm"><div class="card-body text-center">
+    <h6>Overall Position</h6><h3>{{ result.overall_position }} of {{ result.class_size }}</h3></div></div></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-6"><div class="card shadow-sm"><div class="card-body">
+    <h6>Teacher's Remark</h6><p class="mb-0">{{ student.teacher_remark or "—" }}</p></div></div></div>
+  <div class="col-md-6"><div class="card shadow-sm"><div class="card-body">
+    <h6>Principal's Remark</h6><p class="mb-0">{{ student.principal_remark or "—" }}</p></div></div></div>
+</div>
+{% else %}
+<p class="text-muted">No subjects set up for this class yet.</p>
+{% endif %}
+{% endblock %}

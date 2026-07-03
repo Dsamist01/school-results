@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0">{{ sc.name }} — Results</h2>
+    <p class="text-muted mb-0">{{ term }}, {{ session }} &middot; {{ data.class_size }} student(s)</p>
+  </div>
+  <div>
+    <a href="{{ url_for('results.export_class_xlsx', class_id=sc.id) }}" class="btn btn-success">
+      <i class="bi bi-file-earmark-spreadsheet"></i> Export Spreadsheet
+    </a>
+    <a href="{{ url_for('results.export_class_pdf', class_id=sc.id) }}" class="btn btn-danger">
+      <i class="bi bi-file-earmark-pdf"></i> Export All PDFs
+    </a>
+  </div>
+</div>
+
+<div class="table-responsive">
+<table class="table table-sm table-bordered bg-white shadow-sm align-middle">
+  <thead class="table-light">
+    <tr>
+      <th rowspan="2">#</th><th rowspan="2">Student</th>
+      {% for cs in data.class_subjects %}
+      <th colspan="3" class="text-center">{{ cs.subject.name }}</th>
+      {% endfor %}
+      <th rowspan="2">Grand Total</th><th rowspan="2">%</th><th rowspan="2">Position</th><th rowspan="2"></th>
+    </tr>
+    <tr>
+      {% for cs in data.class_subjects %}
+      <th class="text-center small">Total</th><th class="text-center small">Pos</th><th class="text-center small">Grade</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+  {% for row in data.students %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ row.student.name }}</td>
+      {% for cs in data.class_subjects %}
+        {% set sub = row.subjects[cs.id] %}
+        <td class="text-center">{{ sub.total }}</td>
+        <td class="text-center">{{ sub.position }}</td>
+        <td class="text-center">{{ sub.grade }}</td>
+      {% endfor %}
+      <td class="text-center fw-bold">{{ row.grand_total }}/{{ row.max_total }}</td>
+      <td class="text-center">{{ row.percentage }}%</td>
+      <td class="text-center fw-bold">{{ row.overall_position }}</td>
+      <td><a href="{{ url_for('results.student_result', student_id=row.student.id) }}" class="btn btn-sm btn-outline-primary">View</a></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="20" class="text-center text-muted py-4">No students yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

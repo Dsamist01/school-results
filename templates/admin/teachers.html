@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">Teachers &amp; Staff Accounts</h2>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <form method="POST" class="row g-2 align-items-end">
+      <div class="col-md-3"><label class="form-label">Name</label>
+        <input type="text" name="name" class="form-control" required></div>
+      <div class="col-md-3"><label class="form-label">Email</label>
+        <input type="email" name="email" class="form-control" required></div>
+      <div class="col-md-2"><label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" minlength="6" required></div>
+      <div class="col-md-2"><label class="form-label">Role</label>
+        <select name="role" class="form-select">
+          <option value="teacher">Teacher</option>
+          <option value="admin">Admin</option>
+        </select></div>
+      <div class="col-md-2"><button class="btn btn-primary w-100">Add Account</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="table-responsive">
+<table class="table table-hover bg-white shadow-sm align-middle">
+  <thead class="table-light"><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for u in users %}
+    <tr>
+      <td>{{ u.name }}</td><td>{{ u.email }}</td>
+      <td><span class="badge text-bg-{{ 'dark' if u.role=='admin' else 'secondary' }}">{{ u.role }}</span></td>
+      <td><span class="badge text-bg-{{ 'success' if u.active else 'secondary' }}">{{ 'active' if u.active else 'inactive' }}</span></td>
+      <td class="text-end">
+        <form method="POST" action="{{ url_for('admin.toggle_teacher', user_id=u.id) }}" class="d-inline">
+          <button class="btn btn-sm btn-outline-secondary">{{ 'Deactivate' if u.active else 'Activate' }}</button>
+        </form>
+        <form method="POST" action="{{ url_for('admin.delete_teacher', user_id=u.id) }}" class="d-inline"
+              onsubmit="return confirm('Delete this account?');">
+          <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

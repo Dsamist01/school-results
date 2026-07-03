@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">Admin Dashboard</h2>
+<div class="row g-3">
+  <div class="col-md-3">
+    <div class="card text-bg-primary shadow-sm"><div class="card-body">
+      <h6>Classes</h6><h2>{{ class_count }} / 20</h2>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-bg-success shadow-sm"><div class="card-body">
+      <h6>Students</h6><h2>{{ student_count }}</h2>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-bg-info shadow-sm"><div class="card-body">
+      <h6>Teachers</h6><h2>{{ teacher_count }}</h2>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-bg-warning shadow-sm"><div class="card-body">
+      <h6>Subjects</h6><h2>{{ subject_count }}</h2>
+    </div></div>
+  </div>
+</div>
+
+<div class="mt-4">
+  <h5>Quick Links</h5>
+  <a href="{{ url_for('admin.classes') }}" class="btn btn-outline-primary me-2 mb-2">Manage Classes</a>
+  <a href="{{ url_for('admin.teachers') }}" class="btn btn-outline-primary me-2 mb-2">Manage Teachers</a>
+  <a href="{{ url_for('admin.grading') }}" class="btn btn-outline-primary me-2 mb-2">Grading Scale</a>
+  <a href="{{ url_for('admin.settings') }}" class="btn btn-outline-primary me-2 mb-2">School Settings</a>
+</div>
+{% endblock %}

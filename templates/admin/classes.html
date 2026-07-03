@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">Classes <span class="badge text-bg-secondary">{{ classes|length }} / 20</span></h2>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <form method="POST" class="row g-2">
+      <div class="col-auto flex-grow-1">
+        <input type="text" name="name" class="form-control" placeholder="e.g. Basic 4 / JSS 2" required>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-primary" {% if classes|length >= 20 %}disabled{% endif %}>
+          <i class="bi bi-plus-circle"></i> Add Class
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="table-responsive">
+<table class="table table-hover align-middle bg-white shadow-sm">
+  <thead class="table-light">
+    <tr><th>Class</th><th>Students</th><th>Subjects</th><th>Form Teacher</th><th></th></tr>
+  </thead>
+  <tbody>
+  {% for c in classes %}
+    <tr>
+      <td><strong>{{ c.name }}</strong></td>
+      <td>{{ c.students|length }}</td>
+      <td>{{ c.class_subjects|length }}
+        <a href="{{ url_for('admin.class_subjects', class_id=c.id) }}" class="btn btn-sm btn-outline-secondary ms-1">Manage</a>
+      </td>
+      <td>
+        <form method="POST" action="{{ url_for('admin.set_form_teacher', class_id=c.id) }}" class="d-flex gap-1">
+          <select name="teacher_id" class="form-select form-select-sm">
+            <option value="">— none —</option>
+            {% for t in teachers %}
+            <option value="{{ t.id }}" {% if c.form_teacher_id==t.id %}selected{% endif %}>{{ t.name }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-sm btn-outline-primary">Save</button>
+        </form>
+      </td>
+      <td class="text-end">
+        <a href="{{ url_for('admin.students', class_id=c.id) }}" class="btn btn-sm btn-outline-secondary">Students</a>
+        <a href="{{ url_for('teacher.class_remarks', class_id=c.id) }}" class="btn btn-sm btn-outline-secondary">Fees &amp; Remarks</a>
+        <a href="{{ url_for('results.class_results', class_id=c.id) }}" class="btn btn-sm btn-outline-success">Results</a>
+        <form method="POST" action="{{ url_for('admin.delete_class', class_id=c.id) }}" class="d-inline"
+              onsubmit="return confirm('Delete {{ c.name }} and all its data? This cannot be undone.');">
+          <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5" class="text-center text-muted py-4">No classes yet. Add your first one above.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

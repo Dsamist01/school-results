@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-1">School Subjects</h2>
+<p class="text-muted">This is the master list of subjects your school offers. Add a subject
+here, then go to a class's "Manage subjects" page to add it to that class's timetable.</p>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <form method="POST" class="d-flex gap-2">
+      <input type="text" name="name" class="form-control" placeholder="e.g. Further Mathematics" required>
+      <button class="btn btn-primary"><i class="bi bi-plus-circle"></i> Add Subject</button>
+    </form>
+  </div>
+</div>
+
+<div class="table-responsive">
+<table class="table table-hover bg-white shadow-sm align-middle">
+  <thead class="table-light"><tr><th>Subject</th><th>Used In</th><th></th></tr></thead>
+  <tbody>
+  {% for s in subjects %}
+    <tr>
+      <td>{{ s.name }}</td>
+      <td>
+        {% if usage[s.id] %}
+          {% for c in usage[s.id] %}
+          <span class="badge text-bg-secondary">{{ c.name }}</span>
+          {% endfor %}
+        {% else %}
+          <span class="text-muted small">Not assigned to any class yet</span>
+        {% endif %}
+      </td>
+      <td class="text-end">
+        <form method="POST" action="{{ url_for('admin.delete_subject', subject_id=s.id) }}"
+              onsubmit="return confirm('Remove {{ s.name }} from the school-wide subject list?');">
+          <button class="btn btn-sm btn-outline-danger" {% if usage[s.id] %}title="Remove it from all classes first"{% endif %}>
+            <i class="bi bi-trash"></i>
+          </button>
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="3" class="text-center text-muted py-4">No subjects added yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
