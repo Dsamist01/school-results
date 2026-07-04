@@ -26,12 +26,14 @@ def create_app(config_class=Config):
     from routes.teacher import teacher_bp
     from routes.results import results_bp
     from routes.main import main_bp
+    from routes.media import media_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(teacher_bp, url_prefix="/teacher")
     app.register_blueprint(results_bp, url_prefix="/results")
+    app.register_blueprint(media_bp)
 
     @app.context_processor
     def inject_globals():
@@ -70,6 +72,7 @@ def _migrate_new_columns():
     checks = [
         ("student", "photo_path", "VARCHAR(255) DEFAULT ''"),
         ("school_settings", "logo_path", "VARCHAR(255) DEFAULT ''"),
+        ("school_settings", "term_ends", "VARCHAR(50) DEFAULT ''"),
     ]
     for table, column, coltype in checks:
         if table not in inspector.get_table_names():

@@ -73,6 +73,24 @@ def delete_class(class_id):
     return redirect(url_for("admin.classes"))
 
 
+@admin_bp.route("/classes/<int:class_id>/edit", methods=["POST"])
+@admin_required
+def edit_class(class_id):
+    sc = SchoolClass.query.get_or_404(class_id)
+    new_name = request.form.get("name", "").strip()
+    if not new_name:
+        flash("Class name can't be empty.", "danger")
+    elif SchoolClass.query.filter(db.func.lower(SchoolClass.name) == new_name.lower(),
+                                   SchoolClass.id != class_id).first():
+        flash(f"A class named '{new_name}' already exists.", "warning")
+    else:
+        old_name = sc.name
+        sc.name = new_name
+        db.session.commit()
+        flash(f"Renamed '{old_name}' to '{new_name}'.", "success")
+    return redirect(url_for("admin.classes"))
+
+
 @admin_bp.route("/classes/<int:class_id>/form-teacher", methods=["POST"])
 @admin_required
 def set_form_teacher(class_id):
@@ -203,6 +221,25 @@ def delete_subject(subject_id):
     return redirect(url_for("admin.subjects"))
 
 
+@admin_bp.route("/subjects/<int:subject_id>/edit", methods=["POST"])
+@admin_required
+def edit_subject(subject_id):
+    subj = Subject.query.get_or_404(subject_id)
+    new_name = request.form.get("name", "").strip()
+    if not new_name:
+        flash("Subject name can't be empty.", "danger")
+    elif Subject.query.filter(db.func.lower(Subject.name) == new_name.lower(),
+                               Subject.id != subject_id).first():
+        flash(f"'{new_name}' already exists in the subject list.", "warning")
+    else:
+        old_name = subj.name
+        subj.name = new_name
+        db.session.commit()
+        flash(f"Renamed '{old_name}' to '{new_name}'. This updates it everywhere it's used "
+              f"(class timetables, report cards, spreadsheets).", "success")
+    return redirect(url_for("admin.subjects"))
+
+
 # ------------------------------------------------------------------ teachers
 @admin_bp.route("/teachers", methods=["GET", "POST"])
 @admin_required
@@ -226,6 +263,42 @@ def teachers():
 
     all_users = User.query.order_by(User.role.desc(), User.name).all()
     return render_template("admin/teachers.html", users=all_users)
+
+
+@admin_bp.route("/teachers/<int:user_id>/edit", methods=["POST"])
+@admin_required
+def edit_teacher(user_id):
+    u = User.query.get_or_404(user_id)
+    name = request.form.get("name", "").strip()
+    email = request.form.get("email", "").strip().lower()
+    role = request.form.get("role", u.role)
+    new_password = request.form.get("password", "").strip()
+
+    if not name or not email:
+        flash("Name and email are required.", "danger")
+        return redirect(url_for("admin.teachers"))
+
+    existing = User.query.filter(db.func.lower(User.email) == email, User.id != user_id).first()
+    if existing:
+        flash("That email is already used by another account.", "danger")
+        return redirect(url_for("admin.teachers"))
+
+    if u.id == current_user.id and role != "admin":
+        flash("You can't remove your own admin access.", "warning")
+        return redirect(url_for("admin.teachers"))
+
+    u.name = name
+    u.email = email
+    u.role = role
+    if new_password:
+        if len(new_password) < 6:
+            flash("New password must be at least 6 characters. Other changes were saved, "
+                  "but the password was left unchanged.", "warning")
+        else:
+            u.set_password(new_password)
+    db.session.commit()
+    flash(f"Updated details for {u.name}.", "success")
+    return redirect(url_for("admin.teachers"))
 
 
 @admin_bp.route("/teachers/<int:user_id>/toggle", methods=["POST"])
@@ -370,24 +443,6 @@ def bulk_add_students(class_id):
     return redirect(url_for("admin.students", class_id=class_id))
 
 
-@admin_bp.route("/classes/<int:class_id>/bulk-fees", methods=["POST"])
-@login_required
-def bulk_set_fees(class_id):
-    sc = SchoolClass.query.get_or_404(class_id)
-    _require_class_access(sc)
-    amount = request.form.get("next_fees", "").strip()
-    if not amount:
-        flash("Enter an amount first.", "warning")
-    else:
-        students_in_class = Student.query.filter_by(class_id=class_id).all()
-        for st in students_in_class:
-            st.next_fees = amount
-        db.session.commit()
-        flash(f"Next term fees set to {amount} for all {len(students_in_class)} student(s) in {sc.name}.",
-              "success")
-    return redirect(url_for("admin.students", class_id=class_id))
-
-
 # --------------------------------------------------------------------- grading
 @admin_bp.route("/grading", methods=["GET", "POST"])
 @admin_required
@@ -458,6 +513,7 @@ def settings():
         school.motto = request.form.get("motto", school.motto)
         school.current_term = request.form.get("current_term", school.current_term)
         school.current_session = request.form.get("current_session", school.current_session)
+        school.term_ends = request.form.get("term_ends", school.term_ends)
         school.resumption_date = request.form.get("resumption_date", school.resumption_date)
 
         logo_file = request.files.get("logo")

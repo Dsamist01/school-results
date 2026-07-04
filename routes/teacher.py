@@ -189,10 +189,9 @@ def class_remarks(class_id):
         student = Student.query.get_or_404(student_id)
         student.attendance_present = int(request.form.get("attendance_present") or 0)
         student.attendance_total = int(request.form.get("attendance_total") or 0)
-        student.fees_balance = request.form.get("fees_balance", "")
-        student.next_fees = request.form.get("next_fees", "")
         student.teacher_remark = request.form.get("teacher_remark", "")
-        student.principal_remark = request.form.get("principal_remark", "")
+        if current_user.is_admin():
+            student.principal_remark = request.form.get("principal_remark", student.principal_remark)
         for sk in skills:
             rating_raw = request.form.get(f"skill_{sk.id}", "").strip()
             if rating_raw:

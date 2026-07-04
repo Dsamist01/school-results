@@ -11,6 +11,7 @@ from reportlab.platypus import (SimpleDocTemplate, Table, TableStyle, Paragraph,
 from flask import current_app
 from models import SchoolSettings, Skill
 from utils.grading import compute_student_result
+from utils.uploads import resolve_upload_path
 
 styles = getSampleStyleSheet()
 TITLE = ParagraphStyle("title", parent=styles["Heading2"], alignment=TA_CENTER, spaceAfter=2)
@@ -20,15 +21,15 @@ SECTION = ParagraphStyle("section", parent=styles["Heading4"], spaceBefore=5, sp
 SMALL = ParagraphStyle("small", parent=styles["Normal"], fontSize=8.5, leading=11)
 
 
-def _safe_image(relative_static_path, max_w, max_h):
-    """Loads an image saved under static/<relative_static_path> for use in a
-    PDF, preserving aspect ratio within max_w x max_h. Returns None if the
+def _safe_image(relative_path, max_w, max_h):
+    """Loads an image saved under instance/uploads/ for use in a PDF,
+    preserving aspect ratio within max_w x max_h. Returns None if the
     path is empty or the file can't be read (never raises)."""
-    if not relative_static_path:
+    if not relative_path:
         return None
     try:
-        full_path = os.path.join(current_app.root_path, "static", relative_static_path)
-        if not os.path.exists(full_path):
+        full_path = resolve_upload_path(relative_path)
+        if not full_path or not os.path.exists(full_path):
             return None
         img = Image(full_path)
         ratio = min(max_w / img.imageWidth, max_h / img.imageHeight)
@@ -68,11 +69,12 @@ def _header_flowables(school, school_class, student, term, session):
 
     flow = [header_table, Spacer(1, 6)]
 
-    info_table = Table([
+    info_rows = [
         [f"Name: {student.name}", f"Sex: {student.sex or '-'}", f"Class: {school_class.name}"],
-        [f"No. on Roll: {student.roll_no or '-'}", f"Fees Balance: {student.fees_balance or '_____'}",
-         f"Next Fees: {student.next_fees or '_____'}"],
-    ], colWidths=[180, 170, 170])
+        [f"No. on Roll: {student.roll_no or '-'}", f"This Term Ends: {school.term_ends or '_____'}",
+         f"Next Term Resumption: {school.resumption_date or '_____'}"],
+    ]
+    info_table = Table(info_rows, colWidths=[180, 170, 170])
     info_table.setStyle(TableStyle([
         ("FONTSIZE", (0, 0), (-1, -1), 9),
         ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
@@ -113,7 +115,7 @@ def _summary_table(result):
         f"Percentage: {result['percentage']}%",
         f"Overall Position: {result['overall_position']} of {result.get('class_size', '-')}",
     ]]
-    t = Table(data, colWidths=[170, 160, 170])
+    t = Table(data, colWidths=[170, 170, 180])
     t.setStyle(TableStyle([
         ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
         ("FONTSIZE", (0, 0), (-1, -1), 9.5),
@@ -176,8 +178,7 @@ def build_student_pdf(school_class, student, term, session):
     flow.append(_summary_table(result))
     flow.append(Spacer(1, 4))
     flow.append(Paragraph(
-        f"Attendance: {student.attendance_present or 0} out of {student.attendance_total or 0}"
-        + (f" &nbsp;&nbsp; Resumption Date: {school.resumption_date}" if school.resumption_date else ""),
+        f"Attendance: {student.attendance_present or 0} out of {student.attendance_total or 0}",
         SMALL))
 
     skills_table = _skills_table(student, term, session)
@@ -190,7 +191,7 @@ def build_student_pdf(school_class, student, term, session):
         Paragraph(f"<b>Teacher's Remark:</b><br/>{student.teacher_remark or '-'}", SMALL),
         Paragraph(f"<b>Principal's Remark:</b><br/>{student.principal_remark or '-'}", SMALL),
     ]]
-    rt = Table(remarks_data, colWidths=[250, 250])
+    rt = Table(remarks_data, colWidths=[270, 270])
     rt.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#999999")),

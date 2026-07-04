@@ -7,7 +7,7 @@
       <div class="col-12">
         <label class="form-label d-block">School Logo</label>
         {% if school.logo_path %}
-        <img src="{{ url_for('static', filename=school.logo_path) }}" alt="Current logo"
+        <img src="{{ url_for('media.serve_upload', filename=school.logo_path) }}" alt="Current logo"
              style="height:80px;width:auto;object-fit:contain;" class="border rounded p-1 mb-2 d-block">
         {% endif %}
         <input type="file" name="logo" accept=".png,.jpg,.jpeg,.gif,.webp" class="form-control" style="max-width:400px;">
@@ -31,16 +31,18 @@
         <input type="email" name="email" class="form-control" value="{{ school.email }}"></div>
       <hr class="mt-4">
       <h6>Current Term (used for score entry &amp; reports)</h6>
-      <div class="col-md-4"><label class="form-label">Term</label>
+      <div class="col-md-6"><label class="form-label">Term</label>
         <select name="current_term" class="form-select">
           {% for t in ["1st Term", "2nd Term", "3rd Term"] %}
           <option value="{{ t }}" {% if school.current_term==t %}selected{% endif %}>{{ t }}</option>
           {% endfor %}
         </select></div>
-      <div class="col-md-4"><label class="form-label">Session</label>
+      <div class="col-md-6"><label class="form-label">Session</label>
         <input type="text" name="current_session" class="form-control" value="{{ school.current_session }}" placeholder="2025/2026"></div>
-      <div class="col-md-4"><label class="form-label">Resumption Date</label>
-        <input type="text" name="resumption_date" class="form-control" value="{{ school.resumption_date }}" placeholder="5th Jan., 2026"></div>
+      <div class="col-md-6"><label class="form-label">This Term Ends</label>
+        <input type="text" name="term_ends" class="form-control" value="{{ school.term_ends }}" placeholder="27th March, 2026"></div>
+      <div class="col-md-6"><label class="form-label">Next Term Resumption</label>
+        <input type="text" name="resumption_date" class="form-control" value="{{ school.resumption_date }}" placeholder="20th April, 2026"></div>
       <div class="col-12"><button class="btn btn-primary">Save Settings</button></div>
     </form>
   </div>

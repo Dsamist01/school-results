@@ -25,7 +25,12 @@
   <tbody>
   {% for c in classes %}
     <tr>
-      <td><strong>{{ c.name }}</strong></td>
+      <td>
+        <strong>{{ c.name }}</strong>
+        <button type="button" class="btn btn-sm btn-link p-0 ms-1" data-bs-toggle="collapse" data-bs-target="#editClass{{ c.id }}">
+          <i class="bi bi-pencil"></i>
+        </button>
+      </td>
       <td>{{ c.students|length }}</td>
       <td>{{ c.class_subjects|length }}
         <a href="{{ url_for('admin.class_subjects', class_id=c.id) }}" class="btn btn-sm btn-outline-secondary ms-1">Manage</a>
@@ -43,11 +48,19 @@
       </td>
       <td class="text-end">
         <a href="{{ url_for('admin.students', class_id=c.id) }}" class="btn btn-sm btn-outline-secondary">Students</a>
-        <a href="{{ url_for('teacher.class_remarks', class_id=c.id) }}" class="btn btn-sm btn-outline-secondary">Fees &amp; Remarks</a>
+        <a href="{{ url_for('teacher.class_remarks', class_id=c.id) }}" class="btn btn-sm btn-outline-secondary">Skills &amp; Remarks</a>
         <a href="{{ url_for('results.class_results', class_id=c.id) }}" class="btn btn-sm btn-outline-success">Results</a>
         <form method="POST" action="{{ url_for('admin.delete_class', class_id=c.id) }}" class="d-inline"
               onsubmit="return confirm('Delete {{ c.name }} and all its data? This cannot be undone.');">
           <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+        </form>
+      </td>
+    </tr>
+    <tr class="collapse" id="editClass{{ c.id }}">
+      <td colspan="5" class="bg-light">
+        <form method="POST" action="{{ url_for('admin.edit_class', class_id=c.id) }}" class="d-flex gap-2 align-items-center py-2">
+          <input type="text" name="name" class="form-control form-control-sm" value="{{ c.name }}" style="max-width:280px;" required>
+          <button class="btn btn-sm btn-primary">Save</button>
         </form>
       </td>
     </tr>

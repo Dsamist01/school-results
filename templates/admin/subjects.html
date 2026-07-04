@@ -30,11 +30,22 @@ here, then go to a class's "Manage subjects" page to add it to that class's time
         {% endif %}
       </td>
       <td class="text-end">
-        <form method="POST" action="{{ url_for('admin.delete_subject', subject_id=s.id) }}"
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#editSubj{{ s.id }}">
+          <i class="bi bi-pencil"></i>
+        </button>
+        <form method="POST" action="{{ url_for('admin.delete_subject', subject_id=s.id) }}" class="d-inline"
               onsubmit="return confirm('Remove {{ s.name }} from the school-wide subject list?');">
           <button class="btn btn-sm btn-outline-danger" {% if usage[s.id] %}title="Remove it from all classes first"{% endif %}>
             <i class="bi bi-trash"></i>
           </button>
+        </form>
+      </td>
+    </tr>
+    <tr class="collapse" id="editSubj{{ s.id }}">
+      <td colspan="3" class="bg-light">
+        <form method="POST" action="{{ url_for('admin.edit_subject', subject_id=s.id) }}" class="d-flex gap-2 align-items-center py-2">
+          <input type="text" name="name" class="form-control form-control-sm" value="{{ s.name }}" style="max-width:280px;" required>
+          <button class="btn btn-sm btn-primary">Save</button>
         </form>
       </td>
     </tr>

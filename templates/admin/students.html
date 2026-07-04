@@ -47,7 +47,7 @@
     <tr>
       <td>
         {% if s.photo_path %}
-        <img src="{{ url_for('static', filename=s.photo_path) }}" alt="{{ s.name }}"
+        <img src="{{ url_for('media.serve_upload', filename=s.photo_path) }}" alt="{{ s.name }}"
              style="width:42px;height:42px;object-fit:cover;border-radius:6px;">
         {% else %}
         <div class="bg-light border rounded d-flex align-items-center justify-content-center text-muted"
@@ -57,12 +57,32 @@
       <td>{{ s.name }}</td><td>{{ s.sex }}</td><td>{{ s.roll_no }}</td>
       <td class="text-end">
         <a href="{{ url_for('results.student_result', student_id=s.id) }}" class="btn btn-sm btn-outline-success">Result</a>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#editForm{{ s.id }}">
+          <i class="bi bi-pencil"></i>
+        </button>
         <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#photoForm{{ s.id }}">
           <i class="bi bi-camera"></i>
         </button>
         <form method="POST" action="{{ url_for('admin.delete_student', student_id=s.id) }}" class="d-inline"
               onsubmit="return confirm('Remove {{ s.name }}?');">
           <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+        </form>
+      </td>
+    </tr>
+    <tr class="collapse" id="editForm{{ s.id }}">
+      <td colspan="5" class="bg-light">
+        <form method="POST" action="{{ url_for('admin.edit_student', student_id=s.id) }}"
+              class="row g-2 align-items-center py-2">
+          <div class="col-auto"><input type="text" name="name" class="form-control form-control-sm" value="{{ s.name }}" required style="width:200px;"></div>
+          <div class="col-auto">
+            <select name="sex" class="form-select form-select-sm">
+              <option value="">Sex</option>
+              <option value="Male" {% if s.sex=='Male' %}selected{% endif %}>Male</option>
+              <option value="Female" {% if s.sex=='Female' %}selected{% endif %}>Female</option>
+            </select>
+          </div>
+          <div class="col-auto"><input type="text" name="roll_no" class="form-control form-control-sm" value="{{ s.roll_no }}" placeholder="Roll No." style="width:110px;"></div>
+          <div class="col-auto"><button class="btn btn-sm btn-primary">Save Changes</button></div>
         </form>
       </td>
     </tr>

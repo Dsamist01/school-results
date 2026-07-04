@@ -18,6 +18,6 @@ class Config:
     SCHOOL_NAME = os.environ.get("SCHOOL_NAME", "Your School Name")
     MAX_CLASSES = 20
 
-    UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, "instance", "uploads")
     ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
     MAX_IMAGE_SIZE_MB = 3

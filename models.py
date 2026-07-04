@@ -40,6 +40,7 @@ class SchoolSettings(db.Model):
     logo_path = db.Column(db.String(255), default="")
     current_term = db.Column(db.String(50), default="1st Term")
     current_session = db.Column(db.String(20), default="2025/2026")
+    term_ends = db.Column(db.String(50), default="")
     resumption_date = db.Column(db.String(50), default="")
 
     @staticmethod

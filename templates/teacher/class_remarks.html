@@ -3,18 +3,6 @@
 <h2 class="mb-1">{{ sc.name }} — Skills, Attendance &amp; Remarks</h2>
 <p class="text-muted">{{ term }}, {{ session }}</p>
 
-<div class="card shadow-sm mb-4">
-  <div class="card-body">
-    <h6 class="mb-2">Set Next Term Fees for the Whole Class</h6>
-    <p class="text-muted small mb-2">Applies the same amount to every student in {{ sc.name }} at once —
-      handy when the whole class pays the same fee. You can still override it for individual students below.</p>
-    <form method="POST" action="{{ url_for('admin.bulk_set_fees', class_id=sc.id) }}" class="d-flex gap-2" style="max-width:400px;">
-      <input type="text" name="next_fees" class="form-control" placeholder="e.g. 45,000">
-      <button class="btn btn-outline-primary text-nowrap">Apply to All</button>
-    </form>
-  </div>
-</div>
-
 <form method="GET" class="row g-2 mb-4">
   <div class="col-md-5">
     <select name="student_id" class="form-select" onchange="this.form.submit()">
@@ -38,10 +26,6 @@
         <input type="number" name="attendance_present" class="form-control" value="{{ selected_student.attendance_present }}"></div>
       <div class="col-md-3"><label class="form-label">Attendance Total</label>
         <input type="number" name="attendance_total" class="form-control" value="{{ selected_student.attendance_total }}"></div>
-      <div class="col-md-3"><label class="form-label">Fees Balance</label>
-        <input type="text" name="fees_balance" class="form-control" value="{{ selected_student.fees_balance }}"></div>
-      <div class="col-md-3"><label class="form-label">Next Fees</label>
-        <input type="text" name="next_fees" class="form-control" value="{{ selected_student.next_fees }}"></div>
     </div>
   </div>
 </div>
@@ -68,10 +52,14 @@
 <div class="card shadow-sm mb-3">
   <div class="card-body">
     <div class="row g-3">
-      <div class="col-md-6"><label class="form-label">Teacher's Remark</label>
-        <textarea name="teacher_remark" class="form-control" rows="3">{{ selected_student.teacher_remark }}</textarea></div>
+      <div class="{% if current_user.is_admin() %}col-md-6{% else %}col-12{% endif %}">
+        <label class="form-label">Teacher's Remark</label>
+        <textarea name="teacher_remark" class="form-control" rows="3">{{ selected_student.teacher_remark }}</textarea>
+      </div>
+      {% if current_user.is_admin() %}
       <div class="col-md-6"><label class="form-label">Principal's Remark</label>
         <textarea name="principal_remark" class="form-control" rows="3">{{ selected_student.principal_remark }}</textarea></div>
+      {% endif %}
     </div>
   </div>
 </div>
