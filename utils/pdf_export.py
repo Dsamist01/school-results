@@ -60,7 +60,7 @@ def _header_flowables(school, school_class, student, term, session):
         title_block,
         photo_img if photo_img else "",
     ]
-    header_table = Table([header_row], colWidths=[70, 382, 70])
+    header_table = Table([header_row], colWidths=[70, 370, 70])
     header_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("ALIGN", (0, 0), (0, 0), "LEFT"),
@@ -71,10 +71,10 @@ def _header_flowables(school, school_class, student, term, session):
 
     info_rows = [
         [f"Name: {student.name}", f"Sex: {student.sex or '-'}", f"Class: {school_class.name}"],
-        [f"No. on Roll: {student.roll_no or '-'}", f"This Term Ends: {school.term_ends or '_____'}",
-         f"Next Term Resumption: {school.resumption_date or '_____'}"],
+        [f"No. on Roll: {student.roll_no or '-'}", f"Term Ends: {school.term_ends or '_____'}",
+         f"Next Resumption: {school.resumption_date or '_____'}"],
     ]
-    info_table = Table(info_rows, colWidths=[180, 170, 170])
+    info_table = Table(info_rows, colWidths=[170, 160, 170])
     info_table.setStyle(TableStyle([
         ("FONTSIZE", (0, 0), (-1, -1), 9),
         ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
@@ -115,7 +115,7 @@ def _summary_table(result):
         f"Percentage: {result['percentage']}%",
         f"Overall Position: {result['overall_position']} of {result.get('class_size', '-')}",
     ]]
-    t = Table(data, colWidths=[170, 170, 180])
+    t = Table(data, colWidths=[170, 160, 170])
     t.setStyle(TableStyle([
         ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
         ("FONTSIZE", (0, 0), (-1, -1), 9.5),
@@ -191,7 +191,7 @@ def build_student_pdf(school_class, student, term, session):
         Paragraph(f"<b>Teacher's Remark:</b><br/>{student.teacher_remark or '-'}", SMALL),
         Paragraph(f"<b>Principal's Remark:</b><br/>{student.principal_remark or '-'}", SMALL),
     ]]
-    rt = Table(remarks_data, colWidths=[270, 270])
+    rt = Table(remarks_data, colWidths=[250, 250])
     rt.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#999999")),
