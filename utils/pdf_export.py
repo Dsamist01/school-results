@@ -60,7 +60,7 @@ def _header_flowables(school, school_class, student, term, session):
         title_block,
         photo_img if photo_img else "",
     ]
-    header_table = Table([header_row], colWidths=[70, 370, 70])
+    header_table = Table([header_row], colWidths=[70, 360, 70])
     header_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("ALIGN", (0, 0), (0, 0), "LEFT"),

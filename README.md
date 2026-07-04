@@ -7,7 +7,7 @@ header info, subject table, affective/psychomotor skill ratings, attendance, fee
 teacher/principal remarks).
 
 Built with **Python (Flask) + SQLite**, so it's lightweight and easy to run on almost any
-host without needing a database server.
+host without needing a database server. YEAH
 
 ---
 
