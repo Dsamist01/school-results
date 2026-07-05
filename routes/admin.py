@@ -1,11 +1,12 @@
 from functools import wraps
-from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
+from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, send_file
 from flask_login import login_required, current_user
 
 from extensions import db
 from models import (User, SchoolClass, Subject, ClassSubject, TeacherAssignment,
                      Student, GradeBand, Skill, SchoolSettings)
 from utils.uploads import save_image, delete_image
+from utils.backup import build_backup_zip
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -535,3 +536,10 @@ def settings():
         flash("School settings updated.", "success")
         return redirect(url_for("admin.settings"))
     return render_template("admin/settings.html", school=school)
+
+
+@admin_bp.route("/backup")
+@admin_required
+def download_backup():
+    buf, filename = build_backup_zip()
+    return send_file(buf, as_attachment=True, download_name=filename, mimetype="application/zip")

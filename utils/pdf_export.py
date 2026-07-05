@@ -53,7 +53,7 @@ def _header_flowables(school, school_class, student, term, session):
     title_block.append(Paragraph(f"{term} Report Sheet for {session} Session", SUBTITLE))
 
     logo_img = _safe_image(school.logo_path, 60, 60)
-    photo_img = _safe_image(student.photo_path, 60, 70)
+    photo_img = _safe_image(student.photo_path, 70, 70)
 
     header_row = [
         logo_img if logo_img else "",
