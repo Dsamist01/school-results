@@ -5,13 +5,15 @@
     <h2 class="mb-0">{{ sc.name }} — Results</h2>
     <p class="text-muted mb-0">{{ term }}, {{ session }} &middot; {{ data.class_size }} student(s)</p>
   </div>
-  <div>
+<div>
+    {% if current_user.is_admin() %}
     <a href="{{ url_for('results.export_class_xlsx', class_id=sc.id) }}" class="btn btn-success">
       <i class="bi bi-file-earmark-spreadsheet"></i> Export Spreadsheet
     </a>
     <a href="{{ url_for('results.export_class_pdf', class_id=sc.id) }}" class="btn btn-danger">
       <i class="bi bi-file-earmark-pdf"></i> Export All PDFs
     </a>
+    {% endif %}
   </div>
 </div>
 

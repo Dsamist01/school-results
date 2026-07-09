@@ -34,7 +34,10 @@ def class_results(class_id):
 @results_bp.route("/class/<int:class_id>/export/xlsx")
 @login_required
 def export_class_xlsx(class_id):
-    _check_class_access(class_id)
+    # Only admins can export Excel spreadsheets
+    if not current_user.is_admin():
+        abort(403)
+        
     sc = SchoolClass.query.get_or_404(class_id)
     school = SchoolSettings.get()
     buf = build_class_workbook(sc, school.current_term, school.current_session, school.name)
@@ -46,7 +49,10 @@ def export_class_xlsx(class_id):
 @results_bp.route("/class/<int:class_id>/export/pdf")
 @login_required
 def export_class_pdf(class_id):
-    _check_class_access(class_id)
+    # Only admins can export bulk PDF report packs
+    if not current_user.is_admin():
+        abort(403)
+        
     sc = SchoolClass.query.get_or_404(class_id)
     school = SchoolSettings.get()
     buf = build_class_pdfs(sc, school.current_term, school.current_session)
@@ -69,8 +75,11 @@ def student_result(student_id):
 @results_bp.route("/student/<int:student_id>/export/pdf")
 @login_required
 def export_student_pdf(student_id):
+    # Only admins can export standalone report card PDFs
+    if not current_user.is_admin():
+        abort(403)
+        
     student = Student.query.get_or_404(student_id)
-    _check_class_access(student.class_id)
     sc = SchoolClass.query.get_or_404(student.class_id)
     school = SchoolSettings.get()
     buf = build_student_pdf(sc, student, school.current_term, school.current_session)

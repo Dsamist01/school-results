@@ -5,9 +5,11 @@
     <h2 class="mb-0">{{ student.name }}</h2>
     <p class="text-muted mb-0">{{ sc.name }} &middot; {{ term }}, {{ session }}</p>
   </div>
+  {% if current_user.is_admin() %}
   <a href="{{ url_for('results.export_student_pdf', student_id=student.id) }}" class="btn btn-danger">
     <i class="bi bi-file-earmark-pdf"></i> Export PDF
   </a>
+  {% endif %}
 </div>
 
 {% if result %}
