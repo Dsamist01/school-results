@@ -7,6 +7,7 @@ from models import (TeacherAssignment, ClassSubject, Student, Score, SchoolClass
                      SchoolSettings, Skill, SkillRating)
 from utils.xlsx_export import build_score_import_template
 from utils.bulk_import import parse_score_file, match_students
+from utils.grading import compute_student_result
 
 teacher_bp = Blueprint("teacher", __name__)
 
@@ -214,7 +215,12 @@ def class_remarks(class_id):
 
     selected_id = request.args.get("student_id", type=int)
     selected_student = next((s for s in students if s.id == selected_id), None) if selected_id else None
+    
+    # Live academic scorecard calculation for the principal review dashboard
+    student_result_data = None
+    if selected_student:
+        student_result_data = compute_student_result(sc, selected_student, term, session)
 
     return render_template("teacher/class_remarks.html", sc=sc, students=students, skills=skills,
                             ratings_map=ratings_map, term=term, session=session,
-                            selected_student=selected_student)
+                            selected_student=selected_student, student_result=student_result_data)

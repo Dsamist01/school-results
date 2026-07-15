@@ -16,20 +16,81 @@
 
 {% if selected_student %}
 {% set sid = selected_student.id %}
+
+<!-- Academic Performance Summary Card for Review -->
+{% if student_result %}
+<div class="card border-primary shadow-sm mb-4">
+  <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+    <h6 class="mb-0"><i class="bi bi-journal-bookmark"></i> {{ selected_student.name }}'s Performance Summary</h6>
+    <span class="badge bg-light text-primary">Position: {{ student_result.overall_position }} of {{ student_result.class_size }}</span>
+  </div>
+  <div class="card-body">
+    <div class="row g-3 mb-3">
+      <div class="col-md-6 text-center border-end">
+        <span class="text-muted small">Grand Total</span>
+        <h4 class="mb-0 text-primary">{{ student_result.grand_total }} / {{ student_result.max_total }}</h4>
+      </div>
+      <div class="col-md-6 text-center">
+        <span class="text-muted small">Average Percentage</span>
+        <h4 class="mb-0 text-success">{{ student_result.percentage }}%</h4>
+      </div>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="table table-sm table-striped align-middle small mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Subject</th>
+            <th class="text-center">Test</th>
+            <th class="text-center">Exam</th>
+            <th class="text-center">Total</th>
+            <th class="text-center">Grade</th>
+            <th>Remark</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cs_id, sub in student_result.subjects.items() %}
+          <tr>
+            <td><strong>{{ sub.subject }}</strong></td>
+            <td class="text-center">{{ sub.test }}</td>
+            <td class="text-center">{{ sub.exam }}</td>
+            <td class="text-center fw-bold text-primary">{{ sub.total }}</td>
+            <td class="text-center"><span class="badge bg-secondary">{{ sub.grade }}</span></td>
+            <td><span class="text-muted">{{ sub.remark }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 <form method="POST">
 <input type="hidden" name="student_id" value="{{ sid }}">
+
+<!-- Attendance Card -->
 <div class="card shadow-sm mb-3">
   <div class="card-body">
     <h5>{{ selected_student.name }}</h5>
     <div class="row g-3">
-      <div class="col-md-3"><label class="form-label">Attendance Present</label>
-        <input type="number" name="attendance_present" class="form-control" value="{{ selected_student.attendance_present }}"></div>
-      <div class="col-md-3"><label class="form-label">Attendance Total</label>
-        <input type="number" name="attendance_total" class="form-control" value="{{ selected_student.attendance_total }}"></div>
+      <div class="col-md-3">
+        <label class="form-label">Attendance Present</label>
+        <input type="number" name="attendance_present" class="form-control" 
+               value="{{ selected_student.attendance_present }}" 
+               {% if current_user.is_admin() %}readonly class="form-control bg-light" style="pointer-events: none;"{% endif %}>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Attendance Total</label>
+        <input type="number" name="attendance_total" class="form-control" 
+               value="{{ selected_student.attendance_total }}" 
+               {% if current_user.is_admin() %}readonly class="form-control bg-light" style="pointer-events: none;"{% endif %}>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- Skill Ratings Card (Disabled/Read-Only for Admin) -->
 <div class="card shadow-sm mb-3">
   <div class="card-body">
     <h6>Skill Ratings (1 - 5)</h6>
@@ -37,7 +98,8 @@
     {% for sk in skills %}
       <div class="col">
         <label class="form-label">{{ sk.name }}</label>
-        <select name="skill_{{ sk.id }}" class="form-select form-select-sm">
+        <select name="skill_{{ sk.id }}" class="form-select form-select-sm" 
+                {% if current_user.is_admin() %}disabled class="form-select form-select-sm bg-light" style="pointer-events: none;"{% endif %}>
           <option value="">-</option>
           {% for v in range(1,6) %}
           <option value="{{ v }}" {% if ratings_map[sid].get(sk.id)==v %}selected{% endif %}>{{ v }}</option>
@@ -49,22 +111,47 @@
   </div>
 </div>
 
+<!-- Remarks Card -->
 <div class="card shadow-sm mb-3">
   <div class="card-body">
     <div class="row g-3">
-      <div class="{% if current_user.is_admin() %}col-md-6{% else %}col-12{% endif %}">
-        <label class="form-label">Teacher's Remark</label>
-        <textarea name="teacher_remark" class="form-control" rows="3">{{ selected_student.teacher_remark }}</textarea>
-      </div>
+      
       {% if current_user.is_admin() %}
-      <div class="col-md-6"><label class="form-label">Principal's Remark</label>
-        <textarea name="principal_remark" class="form-control" rows="3">{{ selected_student.principal_remark }}</textarea></div>
+      <!-- VIEW MODE FOR ADMIN: Teacher's Comment is Read-Only, Principal's Comment is EDITABLE -->
+      <div class="col-md-6">
+        <label class="form-label fw-bold text-muted">Teacher's Remark (Read Only)</label>
+        <div class="p-3 bg-light border rounded">
+          {{ selected_student.teacher_remark or "— No teacher remark entered yet —" }}
+        </div>
+        <input type="hidden" name="teacher_remark" value="{{ selected_student.teacher_remark }}">
+      </div>
+      
+      <div class="col-md-6">
+        <label class="form-label fw-bold text-primary">Principal's Remark</label>
+        <textarea name="principal_remark" class="form-control border-primary" rows="4" autofocus placeholder="Type overall principal assessment here...">{{ selected_student.principal_remark }}</textarea>
+      </div>
+      
+      {% else %}
+      <!-- VIEW MODE FOR TEACHERS: Teacher's Comment is EDITABLE, Principal's Comment is Read-Only -->
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Teacher's Remark</label>
+        <textarea name="teacher_remark" class="form-control" rows="4" placeholder="Enter teacher assessment...">{{ selected_student.teacher_remark }}</textarea>
+      </div>
+      
+      <div class="col-md-6">
+        <label class="form-label fw-bold text-muted">Principal's Remark (Read Only)</label>
+        <div class="p-3 bg-light border rounded">
+          {{ selected_student.principal_remark or "— No principal remark entered yet —" }}
+        </div>
+        <input type="hidden" name="principal_remark" value="{{ selected_student.principal_remark }}">
+      </div>
       {% endif %}
+
     </div>
   </div>
 </div>
 
-<button class="btn btn-primary"><i class="bi bi-save"></i> Save</button>
+<button class="btn btn-primary"><i class="bi bi-save"></i> Save Remarks</button>
 </form>
 {% else %}
 <p class="text-muted">Choose a student above to edit their skills, attendance and remarks.</p>
