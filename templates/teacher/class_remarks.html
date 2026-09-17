@@ -17,7 +17,7 @@
 {% if selected_student %}
 {% set sid = selected_student.id %}
 
-<!-- Academic Performance Summary Card for Review -->
+<!-- Academic Performance Summary Card -->
 {% if student_result %}
 <div class="card border-primary shadow-sm mb-4">
   <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -69,28 +69,24 @@
 <form method="POST">
 <input type="hidden" name="student_id" value="{{ sid }}">
 
-<!-- Attendance Card -->
+<!-- Attendance Card (Editable by both Admin and Teacher) -->
 <div class="card shadow-sm mb-3">
   <div class="card-body">
     <h5>{{ selected_student.name }}</h5>
     <div class="row g-3">
       <div class="col-md-3">
         <label class="form-label">Attendance Present</label>
-        <input type="number" name="attendance_present" class="form-control" 
-               value="{{ selected_student.attendance_present }}" 
-               {% if current_user.is_admin() %}readonly class="form-control bg-light" style="pointer-events: none;"{% endif %}>
+        <input type="number" name="attendance_present" class="form-control" value="{{ selected_student.attendance_present }}">
       </div>
       <div class="col-md-3">
         <label class="form-label">Attendance Total</label>
-        <input type="number" name="attendance_total" class="form-control" 
-               value="{{ selected_student.attendance_total }}" 
-               {% if current_user.is_admin() %}readonly class="form-control bg-light" style="pointer-events: none;"{% endif %}>
+        <input type="number" name="attendance_total" class="form-control" value="{{ selected_student.attendance_total }}">
       </div>
     </div>
   </div>
 </div>
 
-<!-- Skill Ratings Card (Disabled/Read-Only for Admin) -->
+<!-- Skill Ratings Card (Editable by both Admin and Teacher) -->
 <div class="card shadow-sm mb-3">
   <div class="card-body">
     <h6>Skill Ratings (1 - 5)</h6>
@@ -98,8 +94,7 @@
     {% for sk in skills %}
       <div class="col">
         <label class="form-label">{{ sk.name }}</label>
-        <select name="skill_{{ sk.id }}" class="form-select form-select-sm" 
-                {% if current_user.is_admin() %}disabled class="form-select form-select-sm bg-light" style="pointer-events: none;"{% endif %}>
+        <select name="skill_{{ sk.id }}" class="form-select form-select-sm">
           <option value="">-</option>
           {% for v in range(1,6) %}
           <option value="{{ v }}" {% if ratings_map[sid].get(sk.id)==v %}selected{% endif %}>{{ v }}</option>
@@ -117,13 +112,10 @@
     <div class="row g-3">
       
       {% if current_user.is_admin() %}
-      <!-- VIEW MODE FOR ADMIN: Teacher's Comment is Read-Only, Principal's Comment is EDITABLE -->
+      <!-- ADMIN VIEW: Can edit both Teacher's Remark and Principal's Remark -->
       <div class="col-md-6">
-        <label class="form-label fw-bold text-muted">Teacher's Remark (Read Only)</label>
-        <div class="p-3 bg-light border rounded">
-          {{ selected_student.teacher_remark or "— No teacher remark entered yet —" }}
-        </div>
-        <input type="hidden" name="teacher_remark" value="{{ selected_student.teacher_remark }}">
+        <label class="form-label fw-bold text-secondary">Teacher's Remark</label>
+        <textarea name="teacher_remark" class="form-control" rows="4" placeholder="Enter or edit teacher remark...">{{ selected_student.teacher_remark }}</textarea>
       </div>
       
       <div class="col-md-6">
@@ -132,7 +124,7 @@
       </div>
       
       {% else %}
-      <!-- VIEW MODE FOR TEACHERS: Teacher's Comment is EDITABLE, Principal's Comment is Read-Only -->
+      <!-- TEACHER VIEW: Teacher Remark is EDITABLE, Principal Remark is READ-ONLY -->
       <div class="col-md-6">
         <label class="form-label fw-bold">Teacher's Remark</label>
         <textarea name="teacher_remark" class="form-control" rows="4" placeholder="Enter teacher assessment...">{{ selected_student.teacher_remark }}</textarea>

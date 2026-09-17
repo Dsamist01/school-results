@@ -188,11 +188,17 @@ def class_remarks(class_id):
     if request.method == "POST":
         student_id = int(request.form["student_id"])
         student = Student.query.get_or_404(student_id)
+        
+        # Attendance & Teacher Remark (editable by both Admin and Form Teacher)
         student.attendance_present = int(request.form.get("attendance_present") or 0)
         student.attendance_total = int(request.form.get("attendance_total") or 0)
         student.teacher_remark = request.form.get("teacher_remark", "")
+        
+        # Principal Remark (only editable by Admin)
         if current_user.is_admin():
             student.principal_remark = request.form.get("principal_remark", student.principal_remark)
+            
+        # Skill Ratings (editable by both Admin and Form Teacher)
         for sk in skills:
             rating_raw = request.form.get(f"skill_{sk.id}", "").strip()
             if rating_raw:
@@ -204,8 +210,9 @@ def class_remarks(class_id):
                 else:
                     db.session.add(SkillRating(student_id=student_id, skill_id=sk.id,
                                                 term=term, session=session, rating=rating))
+
         db.session.commit()
-        flash(f"Remarks saved for {student.name}.", "success")
+        flash(f"Remarks and skills saved for {student.name}.", "success")
         return redirect(url_for("teacher.class_remarks", class_id=class_id))
 
     ratings_map = {}
@@ -216,7 +223,6 @@ def class_remarks(class_id):
     selected_id = request.args.get("student_id", type=int)
     selected_student = next((s for s in students if s.id == selected_id), None) if selected_id else None
     
-    # Live academic scorecard calculation for the principal review dashboard
     student_result_data = None
     if selected_student:
         student_result_data = compute_student_result(sc, selected_student, term, session)

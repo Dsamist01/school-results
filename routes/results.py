@@ -1,10 +1,11 @@
-from flask import Blueprint, render_template, redirect, url_for, request, abort, send_file
+from flask import Blueprint, render_template, redirect, url_for, request, abort, send_file, flash
 from flask_login import login_required, current_user
 
 from models import SchoolClass, Student, SchoolSettings, TeacherAssignment
 from utils.grading import compute_class_results, compute_student_result
 from utils.xlsx_export import build_class_workbook
 from utils.pdf_export import build_student_pdf, build_class_pdfs
+from flask import send_file, flash, redirect, url_for, abort
 
 results_bp = Blueprint("results", __name__)
 
@@ -34,16 +35,27 @@ def class_results(class_id):
 @results_bp.route("/class/<int:class_id>/export/xlsx")
 @login_required
 def export_class_xlsx(class_id):
-    # Only admins can export Excel spreadsheets
     if not current_user.is_admin():
         abort(403)
         
     sc = SchoolClass.query.get_or_404(class_id)
     school = SchoolSettings.get()
+    
     buf = build_class_workbook(sc, school.current_term, school.current_session, school.name)
+    
+    if buf is None:
+        flash("Error generating Excel file.", "danger")
+        return redirect(url_for("results.class_results", class_id=class_id))
+        
+    buf.seek(0)
     filename = f"{sc.name}_{school.current_term}_{school.current_session}.xlsx".replace(" ", "_")
-    return send_file(buf, as_attachment=True, download_name=filename,
-                      mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    
+    return send_file(
+        buf,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 
 @results_bp.route("/class/<int:class_id>/export/pdf")
